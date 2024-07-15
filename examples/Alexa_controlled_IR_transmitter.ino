@@ -58,7 +58,7 @@
 #include <Espalexa.h>
 
 #include <TVController.h>
-//#include <LightStripController.h>
+#include <LightStripController.h>
 #include <FanController.h>
 
 const uint16_t tvControllerSendingPin = 4;  // ESP8266 GPIO pin to use. Recommended: 4 (D2).
@@ -67,36 +67,6 @@ IRsend irsend(tvControllerSendingPin);
 // WiFi Credentials
 const char* ssid = "TN-SN7677";
 const char* password = "oshakati";
-
-//IR signal protocols
-enum IRSignalProtocol
-{
-  IRSignalProtocol_Nikai,
-  IRSignalProtocol_Nec
-};
-
-//IR code enums
-enum TVLightsCodes
-{
-  TVLightsCodes_ON = 0xF7C03F,
-  TVLightsCodes_OFF = 0xF740BF,
-  TVLightsCodes_BRIGHTNESS_UP = 0xF700FF,
-  TVLightsCodes_BRIGHTNESS_DOWN = 0xF7807F,
-  TVLightsCodes_RED0 = 0xF720DF,
-  TVLightsCodes_GREEN0 = 0xF7A05F,
-  TVLightsCodes_BLUE0 = 0xF7609F,
-  TVLightsCodes_RED1 = 0xF710EF,
-  TVLightsCodes_GREEN1 = 0xF7906F,
-  TVLightsCodes_BLUE1 = 0xF750AF,
-  TVLightsCodes_RED2 = 0xF730CF,
-  TVLightsCodes_GREEN2 = 0xF7B04F,
-  TVLightsCodes_BLUE2 = 0xF7708F,
-  TVLightsCodes_WHITE = 0xF7E01F,
-  TVLightsCodes_FLASH = 0xF7D02F,
-  TVLightsCodes_STROBE = 0xF7F00F,
-  TVLightsCodes_FADE = 0xF7C837,
-  TVLightsCodes_SMOOTH = 0xF7E817
-};
 
 //device names
 String device_TV = "TV";
@@ -146,7 +116,7 @@ void setup() {
 
 //IR controllers
 TVController tvController{irsend};
-//TODO: tvLightsController tvLightsController{irsend};
+LightStripController lightStripController{irsend};
 FanController fanController{irsend};
 
 void loop()
@@ -196,99 +166,18 @@ boolean connectWifi()
 //NOTE! The argument passed as the parameter "value" for each callback function below is actually a value for brightness of a light. However, since the Alexa library used doesn't seem to support any Alexa smart device types except for lights, I'm instead mapping the brightness value to a specific commnand and setting routines in the Alexa app to make the phrases for setting different brightnesses more intuitive (Example: Routine("TV on" -> Alexa sets brighness to 1%) -> The callback function receives "value = 1" and will then excecute the code that is set up to run when the value argument is equal to 1).
 void IRControlUnitReceivedTVUpdateSignal(uint8_t value)
 {
-  value = espalexa.toPercent(value);
-
-  tvController.sendSignalBasedOnUpdateValue(value);
+  uint8_t controllerCommandId{espalexa.toPercent(value)};
+  tvController.sendSignalBasedOnCommandId(controllerCommandId);
 }
 
 void IRControlUnitReceivedTVLightsUpdateSignal(uint8_t value)
 {
-  value = espalexa.toPercent(value);
-  
-  switch(value)
-  {
-    //Light strip remote commands
-    case 1:
-      irsend.sendNEC(TVLightsCodes_ON);
-      Serial.println("Emitted IR signal based on the value of 'TVLightsCodes_ON'.");
-      break;
-    case 2:
-      irsend.sendNEC(TVLightsCodes_OFF);
-      Serial.println("Emitted IR signal based on the value of 'TVLightsCodes_OFF'.");
-      break;
-    case 3:
-      irsend.sendNEC(TVLightsCodes_BRIGHTNESS_UP);
-      Serial.println("Emitted IR signal based on the value of 'TVLightsCodes_BRIGHTNESS_UP'.");
-      break;
-    case 4:
-      irsend.sendNEC(TVLightsCodes_BRIGHTNESS_DOWN);
-      Serial.println("Emitted IR signal based on the value of 'TVLightsCodes_BRIGHTNESS_DOWN'.");
-      break;
-    case 5:
-      irsend.sendNEC(TVLightsCodes_RED0);
-      Serial.println("Emitted IR signal based on the value of 'TVLightsCodes_RED0'.");
-      break;
-    case 6:
-      irsend.sendNEC(TVLightsCodes_GREEN0);
-      Serial.println("Emitted IR signal based on the value of 'TVLightsCodes_GREEN0'.");
-      break;
-    case 7:
-      irsend.sendNEC(TVLightsCodes_BLUE0);
-      Serial.println("Emitted IR signal based on the value of 'TVLightsCodes_BLUE0'.");
-      break;
-    case 8:
-      irsend.sendNEC(TVLightsCodes_WHITE);
-      Serial.println("Emitted IR signal based on the value of 'TVLightsCodes_WHITE'.");
-      break;
-    case 9:
-      irsend.sendNEC(TVLightsCodes_FLASH);
-      Serial.println("Emitted IR signal based on the value of 'TVLightsCodes_FLASH'.");
-      break;
-    case 10:
-      irsend.sendNEC(TVLightsCodes_STROBE);
-      Serial.println("Emitted IR signal based on the value of 'TVLightsCodes_STROBE'.");
-      break;
-    case 11:
-      irsend.sendNEC(TVLightsCodes_FADE);
-      Serial.println("Emitted IR signal based on the value of 'TVLightsCodes_FADE'.");
-      break;
-    case 12:
-      irsend.sendNEC(TVLightsCodes_SMOOTH);
-      Serial.println("Emitted IR signal based on the value of 'TVLightsCodes_SMOOTH'."); 
-      break;
-    case 13:
-      irsend.sendNEC(TVLightsCodes_RED1);
-      Serial.println("Emitted IR signal based on the value of 'TVLightsCodes_RED1'.");
-      break;
-    case 14:
-      irsend.sendNEC(TVLightsCodes_GREEN1);
-      Serial.println("Emitted IR signal based on the value of 'TVLightsCodes_GREEN1'.");
-      break;
-    case 15:
-      irsend.sendNEC(TVLightsCodes_BLUE1);
-      Serial.println("Emitted IR signal based on the value of 'TVLightsCodes_BLUE1'.");
-      break;
-    case 16:
-      irsend.sendNEC(TVLightsCodes_RED2);
-      Serial.println("Emitted IR signal based on the value of 'TVLightsCodes_RED2'.");
-      break;
-    case 17:
-      irsend.sendNEC(TVLightsCodes_GREEN2);
-      Serial.println("Emitted IR signal based on the value of 'TVLightsCodes_GREEN2'.");
-      break;
-    case 18:
-      irsend.sendNEC(TVLightsCodes_BLUE2);
-      Serial.println("Emitted IR signal based on the value of 'TVLightsCodes_BLUE2'.");
-      break;
-      
-    default:
-      Serial.println("Event registered on 'TV lights' but no action defined for the incoming callback method argument.");
-  }
+  uint8_t controllerCommandId{espalexa.toPercent(value)};
+  lightStripController.sendSignalBasedOnCommandId(controllerCommandId);
 }
 
 void IRControlUnitReceivedFanUpdateSignal(uint8_t value)
 {
-  value = espalexa.toPercent(value);
-  
-  fanController.sendSignalBasedOnUpdateValue(value);
+  uint8_t controllerCommandId{espalexa.toPercent(value)};
+  fanController.sendSignalBasedOnCommandId(controllerCommandId);
 }

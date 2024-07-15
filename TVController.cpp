@@ -100,7 +100,7 @@ void TVController::sendIRSignalsBasedOnState()
   }
 }
 
-void TVController::sendSignalBasedOnUpdateValue(uint8_t value)
+void TVController::sendSignalBasedOnCommandId(uint8_t value)
 {
   switch(value)
   {

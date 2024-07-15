@@ -25,7 +25,7 @@ public:
   TVController(IRsend& irsend);
 
   void sendIRSignalsBasedOnState();
-  void sendSignalBasedOnUpdateValue(uint8_t value);
+  void sendSignalBasedOnCommandId(uint8_t value);
   void sendAndRepeatIRSignal(int code, int numberOfTimes, int delayBetweenSignalsMillis);
   void resetState();
   void printState();

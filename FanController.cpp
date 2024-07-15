@@ -14,7 +14,7 @@ FanController::FanController(IRsend& irsend)
   : irsend{irsend}
 {}
 
-void FanController::sendSignalBasedOnUpdateValue(uint8_t value)
+void FanController::sendSignalBasedOnCommandId(uint8_t value)
 {
   switch(value)
   {
