@@ -19,6 +19,16 @@ enum TVCodes
   TVCodes_NETFLIX = 0x10FEF
 };
 
+TVController::TVController(IRsend& irsend) :
+  irsend{irsend},
+  loopArrowUp{false},
+  loopArrowDown{false},
+  loopArrowLeft{false},
+  loopArrowRight{false},
+  loopVolumeUp{false},
+  loopVolumeDown{false}
+{}
+
 void TVController::setLoopArrowUp()
 {
   resetState();
@@ -49,16 +59,6 @@ void TVController::setLoopVolumeDown()
   resetState();
   loopVolumeDown = true;
 }
-
-TVController::TVController(IRsend& irsend) :
-  irsend{irsend},
-  loopArrowUp{false},
-  loopArrowDown{false},
-  loopArrowLeft{false},
-  loopArrowRight{false},
-  loopVolumeUp{false},
-  loopVolumeDown{false}
-{}
 
 void TVController::sendIRSignalsBasedOnState()
 {

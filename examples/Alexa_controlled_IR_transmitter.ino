@@ -58,6 +58,8 @@
 #include <Espalexa.h>
 
 #include <TVController.h>
+//#include <LightStripController.h>
+#include <FanController.h>
 
 const uint16_t tvControllerSendingPin = 4;  // ESP8266 GPIO pin to use. Recommended: 4 (D2).
 IRsend irsend(tvControllerSendingPin);
@@ -96,15 +98,6 @@ enum TVLightsCodes
   TVLightsCodes_SMOOTH = 0xF7E817
 };
 
-enum FanCodes
-{
-  FanCodes_POWER = 0xCF3E916,
-  FanCodes_MODE  = 0xCF3E11E,
-  FanCodes_SPEED = 0xCF3619E,
-  FanCodes_TIMER = 0xCF339C6,
-  FanCodes_ROTATE = 0xCF3A956
-};
-
 //device names
 String device_TV = "TV";
 String device_tv_lights = "TV lights";
@@ -117,7 +110,6 @@ void IRControlUnitReceivedFanUpdateSignal(uint8_t value);
 
 //helper function declarations
 boolean connectWifi();
-void sendAndRepeatIRSignalNECProtocol(int code, int numberOfTimes, int delayBetweenSignalsMillis = 100);
 
 boolean wifiConnected = false;
 Espalexa espalexa;
@@ -154,8 +146,8 @@ void setup() {
 
 //IR controllers
 TVController tvController{irsend};
-//TODO: TVLightsController tvLightsController{irsend};
-//TODO: FanController FanController{irsend};
+//TODO: tvLightsController tvLightsController{irsend};
+FanController fanController{irsend};
 
 void loop()
 {
@@ -198,18 +190,6 @@ boolean connectWifi()
     Serial.println("Connection failed.");
   }
   return state;
-}
-
-void sendAndRepeatIRSignalNECProtocol(int code, int numberOfTimes, int delayBetweenSignalsMillis)
-{
-  for(int i{0}; i < numberOfTimes; ++i)
-  {
-    irsend.sendNEC(code);
-    Serial.print("Emitted IR signal from TVController -> Protocol: Nec, Code: ");
-    Serial.print(code);
-    Serial.println();
-    delay(delayBetweenSignalsMillis);
-  }
 }
 
 //callback function implementations
@@ -310,34 +290,5 @@ void IRControlUnitReceivedFanUpdateSignal(uint8_t value)
 {
   value = espalexa.toPercent(value);
   
-  switch(value)
-  {
-    //Fan remote commands
-    case 1:
-      irsend.sendNEC(FanCodes_POWER);
-      Serial.println("Emitted IR signal based on the value of 'FanCodes_POWER'.");
-      break;
-    case 2:
-      irsend.sendNEC(FanCodes_MODE);
-      Serial.println("Emitted IR signal based on the value of 'FanCodes_MODE'.");
-      break;
-    case 3:
-      irsend.sendNEC(FanCodes_SPEED);
-      Serial.println("Emitted IR signal based on the value of 'FanCodes_SPEED'.");
-      break;
-    case 4:
-      irsend.sendNEC(FanCodes_TIMER);
-      Serial.println("Emitted IR signal based on the value of 'FanCodes_TIMER'.");
-      break;
-    case 5:
-      irsend.sendNEC(FanCodes_ROTATE);
-      Serial.println("Emitted IR signal based on the value of 'FanCodes_ROTATE'.");
-      break;
-    case 6:
-      sendAndRepeatIRSignalNECProtocol(FanCodes_ROTATE, 2, 1000);
-      break;
-      
-    default:
-      Serial.println("Event registered on 'Fan' but no action defined for the incoming callback method argument.");
-  }
+  fanController.sendSignalBasedOnUpdateValue(value);
 }
