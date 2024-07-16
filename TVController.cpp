@@ -1,9 +1,8 @@
 #include "TVController.h"
-#include <Arduino.h>
 
 enum TVCodes
 {
-  TVCodes_TOGGLE_ON = 0xD5F2A,
+  TVCodes_POWER = 0xD5F2A,
   TVCodes_MUTE = 0xC0F3F,
   TVCodes_VOLUME_UP = 0xD0F2F,
   TVCodes_VOLUME_DOWN = 0xD1F2E,
@@ -12,7 +11,7 @@ enum TVCodes
   TVCodes_ARROW_LEFT = 0xA9F56,
   TVCodes_ARROW_RIGHT = 0xA8F57,
   TVCodes_OK = 0xBFF4,
-  TVCodes_AV = 0x5CFA3,
+  TVCodes_SOURCE = 0x5CFA3,
   TVCodes_HOME = 0xF7F08,
   TVCodes_BACK = 0xD8F27,
   TVCodes_EXIT = 0xF9F06,
@@ -20,226 +19,62 @@ enum TVCodes
 };
 
 TVController::TVController(IRsend& irsend) :
-  irsend{irsend},
-  loopArrowUp{false},
-  loopArrowDown{false},
-  loopArrowLeft{false},
-  loopArrowRight{false},
-  loopVolumeUp{false},
-  loopVolumeDown{false}
+  irsend{irsend}
 {}
 
-void TVController::setLoopArrowUp()
+void TVController::sendPowerButtonSignal()
 {
-  resetState();
-  loopArrowUp = true;
+  irsend.sendNikai(TVCodes_POWER);
 }
-void TVController::setLoopArrowDown()
+void TVController::sendMuteButtonSignal()
 {
-  resetState();
-  loopArrowDown = true;
+  irsend.sendNikai(TVCodes_MUTE);
 }
-void TVController::setLoopArrowLeft()
+void TVController::sendVolumeUpButtonSignal()
 {
-  resetState();
-  loopArrowLeft = true;
+  irsend.sendNikai(TVCodes_VOLUME_UP);
 }
-void TVController::setLoopArrowRight()
+void TVController::sendVolumeDownButtonSignal()
 {
-  resetState();
-  loopArrowRight = true;
+  irsend.sendNikai(TVCodes_VOLUME_DOWN);
 }
-void TVController::setLoopVolumeUp()
+void TVController::sendArrowUpButtonSignal()
 {
-  resetState();
-  loopVolumeUp = true;
+  irsend.sendNikai(TVCodes_ARROW_UP);
 }
-void TVController::setLoopVolumeDown()
+void TVController::sendArrowDownButtonSignal()
 {
-  resetState();
-  loopVolumeDown = true;
+  irsend.sendNikai(TVCodes_ARROW_DOWN);
 }
-
-void TVController::sendIRSignalsBasedOnState()
+void TVController::sendArrowLeftButtonSignal()
 {
-  if(getLoopArrowUp())
-  {
-    irsend.sendNikai(TVCodes_ARROW_UP);
-    Serial.println("Emitted IR signal based on the value of 'TVCodes_ARROW_UP'.");
-    delay(2000); //TODO: Set a timeout (associated with the state variable that is used in the if-statement of this block) for which we won't execute the action of this block again until the timeout has passed. In this way we can prevent loop-actions to run too often without having to block the execution of the entire thread.
-  }
-  if(getLoopArrowDown())
-  {
-    irsend.sendNikai(TVCodes_ARROW_DOWN);
-    Serial.println("Emitted IR signal based on the value of 'TVCodes_ARROW_DOWN'.");
-    delay(2000); //TODO: Set a timeout (associated with the state variable that is used in the if-statement of this block) for which we won't execute the action of this block again until the timeout has passed. In this way we can prevent loop-actions to run too often without having to block the execution of the entire thread.
-  }
-  if(getLoopArrowLeft())
-  {
-    irsend.sendNikai(TVCodes_ARROW_LEFT);
-    Serial.println("Emitted IR signal based on the value of 'TVCodes_ARROW_LEFTW_RIGHT'.");
-    delay(2000); //TODO: Set a timeout (associated with the state variable that is used in the if-statement of this block) for which we won't execute the action of this block again until the timeout has passed. In this way we can prevent loop-actions to run too often without having to block the execution of the entire thread.
-  }
-  if(getLoopArrowRight())
-  {
-    irsend.sendNikai(TVCodes_ARROW_RIGHT);
-    Serial.println("Emitted IR signal based on the value of 'TVCodes_ARROW_RIGHT'.");
-    delay(2000); //TODO: Set a timeout (associated with the state variable that is used in the if-statement of this block) for which we won't execute the action of this block again until the timeout has passed. In this way we can prevent loop-actions to run too often without having to block the execution of the entire thread.
-  }
-  if(getLoopVolumeUp())
-  {
-    irsend.sendNikai(TVCodes_VOLUME_UP);
-    Serial.println("Emitted IR signal based on the value of 'TVCodes_VOLUME_UP'.");
-    delay(2000); //TODO: Set a timeout (associated with the state variable that is used in the if-statement of this block) for which we won't execute the action of this block again until the timeout has passed. In this way we can prevent loop-actions to run too often without having to block the execution of the entire thread.
-  }
-  if(getLoopVolumeDown())
-  {
-    irsend.sendNikai(TVCodes_VOLUME_DOWN);
-    Serial.println("Emitted IR signal based on the value of 'TVCodes_VOLUME_DOWN'.");
-    delay(2000); //TODO: Set a timeout (associated with the state variable that is used in the if-statement of this block) for which we won't execute the action of this block again until the timeout has passed. In this way we can prevent loop-actions to run too often without having to block the execution of the entire thread.
-  }
+  irsend.sendNikai(TVCodes_ARROW_LEFT);
 }
-
-void TVController::sendSignalBasedOnCommandId(uint8_t value)
+void TVController::sendArrowRightButtonSignal()
 {
-  switch(value)
-  {
-    //TV remote commands
-    case 1:
-      irsend.sendNikai(TVCodes_TOGGLE_ON);
-      Serial.println("Emitted IR signal based on the value of 'TVCodes_TOGGLE_ON'.");
-      break;
-    case 2:
-      irsend.sendNikai(TVCodes_MUTE);
-      Serial.println("Emitted IR signal based on the value of 'TVCodes_MUTE'.");
-      break;
-    case 3:
-      sendAndRepeatIRSignal(TVCodes_VOLUME_UP, 2, 100);
-      break;
-    case 4:
-      sendAndRepeatIRSignal(TVCodes_VOLUME_DOWN, 2, 100);
-      break;
-    case 5:
-      irsend.sendNikai(TVCodes_ARROW_UP);
-      Serial.println("Emitted IR signal based on the value of 'TVCodes_ARROW_UP'.");
-      break;
-    case 6:
-      irsend.sendNikai(TVCodes_ARROW_DOWN);
-      Serial.println("Emitted IR signal based on the value of 'TVCodes_ARROW_DOWN'.");
-      break;
-    case 7:
-      irsend.sendNikai(TVCodes_ARROW_LEFT);
-      Serial.println("Emitted IR signal based on the value of 'TVCodes_ARROW_LEFT'.");
-      break;
-    case 8:
-      irsend.sendNikai(TVCodes_ARROW_RIGHT);
-      Serial.println("Emitted IR signal based on the value of 'TVCodes_ARROW_RIGHT'.");
-      break;
-    case 9:
-      irsend.sendNikai(TVCodes_OK);
-      Serial.println("Emitted IR signal based on the value of 'TVCodes_OK'.");
-      break;
-    case 10:
-      irsend.sendNikai(TVCodes_AV);
-      Serial.println("Emitted IR signal based on the value of 'TVCodes_AV'.");
-      break;
-    case 11:
-      irsend.sendNikai(TVCodes_HOME);
-      Serial.println("Emitted IR signal based on the value of 'TVCodes_HOME'.");
-      break;
-    case 12:
-      irsend.sendNikai(TVCodes_BACK);
-      Serial.println("Emitted IR signal based on the value of 'TVCodes_BACK'.");
-      break;
-    case 13:
-      irsend.sendNikai(TVCodes_EXIT);
-      Serial.println("Emitted IR signal based on the value of 'TVCodes_EXIT'.");
-      break;
-    case 14:
-      irsend.sendNikai(TVCodes_NETFLIX);
-      Serial.println("Emitted IR signal based on the value of 'TVCodes_NETFLIX'.");
-      break;
-    case 15:
-      Serial.println("Resetting tv controller state.");
-      resetState();
-      break;
-    case 16:
-      Serial.println("Setting 'loopArrowUp'.");
-      setLoopArrowUp();
-      break;
-    case 17:
-      Serial.println("Setting 'loopArrowDown'.");
-      setLoopArrowDown();
-      break;
-    case 18:
-      Serial.println("Setting 'loopArrowLeft'.");
-      setLoopArrowLeft();
-      break;
-    case 19:
-      Serial.println("Setting 'loopArrowRight'.");
-      setLoopArrowRight();
-      break;
-    case 20:
-      Serial.println("Setting 'loopVolumeUp'.");
-      setLoopVolumeUp();
-      break;
-    case 21:
-      Serial.println("Setting 'loopVolumeDown'.");
-      setLoopVolumeDown();
-      break;
-    case 22:
-      sendAndRepeatIRSignal(TVCodes_VOLUME_UP, 6, 100);
-      break;
-    case 23:
-      sendAndRepeatIRSignal(TVCodes_VOLUME_DOWN, 6, 100);
-      break;
-      
-    default:
-      Serial.println("Event registered on 'TV' but no action defined for the incoming callback method argument.");
-  }
+  irsend.sendNikai(TVCodes_ARROW_RIGHT);
 }
-
-void TVController::sendAndRepeatIRSignal(int code, int numberOfTimes, int delayBetweenSignalsMillis)
+void TVController::sendOKButtonSignal()
 {
-  for(int i{0}; i < numberOfTimes; ++i)
-  {
-    irsend.sendNikai(code);
-    Serial.print("Emitted IR signal from TVController -> Protocol: Nikai, Code: ");
-    Serial.print(code);
-    Serial.println();
-    delay(delayBetweenSignalsMillis);
-  }
+  irsend.sendNikai(TVCodes_OK);
 }
-
-void TVController::resetState()
+void TVController::sendSourceButtonSignal()
 {
-  loopArrowUp = false;
-  loopArrowDown = false;
-  loopArrowLeft = false;
-  loopArrowRight = false;
-  loopVolumeUp = false;
-  loopVolumeDown = false;
+  irsend.sendNikai(TVCodes_SOURCE);
 }
-
-void TVController::printState()
+void TVController::sendHomeButtonSignal()
 {
-  Serial.print("loopArrowUp: ");
-  Serial.println(loopArrowUp);
-  Serial.print("loopArrowDown: ");
-  Serial.println(loopArrowDown);
-  Serial.print("loopArrowLeft: ");
-  Serial.println(loopArrowLeft);
-  Serial.print("loopArrowRight: ");
-  Serial.println(loopArrowRight);
-  Serial.print("loopVolumeUp: ");
-  Serial.println(loopVolumeUp);
-  Serial.print("loopVolumeDown: ");
-  Serial.println(loopVolumeDown);
+  irsend.sendNikai(TVCodes_HOME);
 }
-
-bool TVController::getLoopArrowUp() { return loopArrowUp; }
-bool TVController::getLoopArrowDown() { return loopArrowDown; }
-bool TVController::getLoopArrowLeft() { return loopArrowLeft; }
-bool TVController::getLoopArrowRight() { return loopArrowRight; }
-bool TVController::getLoopVolumeUp() { return loopVolumeUp; }
-bool TVController::getLoopVolumeDown() { return loopVolumeDown; }
+void TVController::sendBackButtonSignal()
+{
+  irsend.sendNikai(TVCodes_BACK);
+}
+void TVController::sendExitButtonSignal()
+{
+  irsend.sendNikai(TVCodes_EXIT);
+}
+void TVController::sendNetflixButtonSignal()
+{
+  irsend.sendNikai(TVCodes_NETFLIX);
+}

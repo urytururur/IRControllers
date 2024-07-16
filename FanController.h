@@ -1,8 +1,7 @@
 #pragma once
-#include "IIRController.h"
 #include "../IRremoteESP8266/src/IRsend.h"
 
-class FanController : public IIRController
+class FanController
 {
 private:
   IRsend& irsend;
@@ -10,6 +9,9 @@ private:
 public:
   FanController(IRsend& irsend);
 
-  void sendSignalBasedOnCommandId(uint8_t value);
-  void sendAndRepeatIRSignal(int code, int numberOfTimes, int delayBetweenSignalsMillis);
+  void sendPowerButtonSignal();
+  void sendModeButtonSignal();
+  void sendSpeedButtonSignal();
+  void sendTimerButtonSignal();
+  void sendRotateButtonSignal();
 };

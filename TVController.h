@@ -1,39 +1,26 @@
 #pragma once
-#include "IIRController.h"
 #include "../IRremoteESP8266/src/IRsend.h"
 
-class TVController : public IIRController
+class TVController
 {
 private:
   IRsend& irsend;
 
-  bool loopArrowUp;
-  bool loopArrowDown;
-  bool loopArrowLeft;
-  bool loopArrowRight;
-  bool loopVolumeUp;
-  bool loopVolumeDown;
-
-  void setLoopArrowUp();
-  void setLoopArrowDown();
-  void setLoopArrowLeft();
-  void setLoopArrowRight();
-  void setLoopVolumeUp();
-  void setLoopVolumeDown();
-
 public:
   TVController(IRsend& irsend);
 
-  void sendIRSignalsBasedOnState();
-  void sendSignalBasedOnCommandId(uint8_t value);
-  void sendAndRepeatIRSignal(int code, int numberOfTimes, int delayBetweenSignalsMillis);
-  void resetState();
-  void printState();
-
-  bool getLoopArrowUp();
-  bool getLoopArrowDown();
-  bool getLoopArrowLeft();
-  bool getLoopArrowRight();
-  bool getLoopVolumeUp();
-  bool getLoopVolumeDown();
+  void sendPowerButtonSignal();
+  void sendMuteButtonSignal();
+  void sendVolumeUpButtonSignal();
+  void sendVolumeDownButtonSignal();
+  void sendArrowUpButtonSignal();
+  void sendArrowDownButtonSignal();
+  void sendArrowLeftButtonSignal();
+  void sendArrowRightButtonSignal();
+  void sendOKButtonSignal();
+  void sendSourceButtonSignal();
+  void sendHomeButtonSignal();
+  void sendBackButtonSignal();
+  void sendExitButtonSignal();
+  void sendNetflixButtonSignal();
 };

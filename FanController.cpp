@@ -1,5 +1,4 @@
 #include "FanController.h"
-#include <Arduino.h>
 
 enum FanCodes
 {
@@ -14,48 +13,23 @@ FanController::FanController(IRsend& irsend)
   : irsend{irsend}
 {}
 
-void FanController::sendSignalBasedOnCommandId(uint8_t value)
+void FanController::sendPowerButtonSignal()
 {
-  switch(value)
-  {
-    //Fan remote commands
-    case 1:
-      irsend.sendNEC(FanCodes_POWER);
-      Serial.println("Emitted IR signal based on the value of 'FanCodes_POWER'.");
-      break;
-    case 2:
-      irsend.sendNEC(FanCodes_MODE);
-      Serial.println("Emitted IR signal based on the value of 'FanCodes_MODE'.");
-      break;
-    case 3:
-      irsend.sendNEC(FanCodes_SPEED);
-      Serial.println("Emitted IR signal based on the value of 'FanCodes_SPEED'.");
-      break;
-    case 4:
-      irsend.sendNEC(FanCodes_TIMER);
-      Serial.println("Emitted IR signal based on the value of 'FanCodes_TIMER'.");
-      break;
-    case 5:
-      irsend.sendNEC(FanCodes_ROTATE);
-      Serial.println("Emitted IR signal based on the value of 'FanCodes_ROTATE'.");
-      break;
-    case 6:
-      sendAndRepeatIRSignal(FanCodes_ROTATE, 2, 1000);
-      break;
-      
-    default:
-      Serial.println("Event registered on 'Fan' but no action defined for the incoming callback method argument.");
-  }
+  irsend.sendNEC(FanCodes_POWER);
 }
-
-void FanController::sendAndRepeatIRSignal(int code, int numberOfTimes, int delayBetweenSignalsMillis)
+void FanController::sendModeButtonSignal()
 {
-  for(int i{0}; i < numberOfTimes; ++i)
-  {
-    irsend.sendNEC(code);
-    Serial.print("Emitted IR signal from TVController -> Protocol: NEC, Code: ");
-    Serial.print(code);
-    Serial.println();
-    delay(delayBetweenSignalsMillis);
-  }
+  irsend.sendNEC(FanCodes_MODE);
+}
+void FanController::sendSpeedButtonSignal()
+{
+  irsend.sendNEC(FanCodes_SPEED);
+}
+void FanController::sendTimerButtonSignal()
+{
+  irsend.sendNEC(FanCodes_TIMER);
+}
+void FanController::sendRotateButtonSignal()
+{
+  irsend.sendNEC(FanCodes_ROTATE);
 }
